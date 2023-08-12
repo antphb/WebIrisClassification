@@ -89,7 +89,7 @@
             </div>
             
         </div>
-        <div class="row">
+        <div class="row plot_scatter">
             <div class="col-md-6">
                 <div id="Sepal" style="width:100%;max-width:700px"></div>
             </div>
@@ -119,6 +119,7 @@
             $("#chooseInput").click(function(){
                 $(".display_input").show();
                 $(".display_file").hide();
+                $(".plot_scatter").show();
             });
             $("#demoFile").change(function(){
                 if(this.checked){
@@ -188,6 +189,7 @@
                 $(".display_input").hide();
                 $("#header").hide();
                 $(".display_file").show();
+                $(".plot_scatter").hide();
             });
 
             // $("#upload").click(function(){
