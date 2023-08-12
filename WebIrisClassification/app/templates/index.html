@@ -1,0 +1,496 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Classification</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+</head>
+<body>
+    <div class="container text-center">
+        <h1>Iris Classification</h1>
+        <input type="radio" name="chooseOption" id="chooseInput" checked>
+        <label for="chooseInput" class="mr-5">Input</label>
+        <input type="radio" name="chooseOption" id="chooseFile">
+        <label for="chooseFile">Choose File</label>
+        <div class="display_input">
+            <div class="row">
+                <div class="col-md-2">
+                    <p class="form-control">sepal_length</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="form-control">sepal_width</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="form-control">petal_length</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="form-control">petal_width</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="form-control">species</p>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <input type="range" id="sepal_length" min="0" max="8" step="0.1" class="form-control" value="0">
+                    <span id="rangeValue_sepal_length">0</span>
+                </div>
+                <div class="col-md-2">
+                    <input type="range" id="sepal_width" min="0" max="8" step="0.1" class="form-control" value="0">
+                    <span id="rangeValue_sepal_width">0</span>
+                </div>
+                <div class="col-md-2">
+                    <input type="range" id="petal_length" min="0" max="8" step="0.1" class="form-control" value="0">
+                    <span id="rangeValue_petal_length">0</span>
+                </div>
+                <div class="col-md-2">
+                    <input type="range" id="petal_width" min="0" max="8" step="0.1" class="form-control" value="0">
+                    <span id="rangeValue_petal_width">0</span>
+                </div>
+                <div class="col-md-4">
+                    <img id="show_img" alt="" src="{%static 'images/Image_default.jpg'%}" class="img-thumbnail" style="max-width: 50%;">
+                    <p id="show_name">Image_default</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="display_file">
+            <input type="checkbox" name="demoFile" id="demoFile">
+            <label for="demoFile">Demo File</label>
+            <input type="file" id="file" class="form-control" accept=".csv">
+            <div class="row" id="header">
+                <div class="col-md-2">
+                    <p class="form-control">sepal_length</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="form-control">sepal_width</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="form-control">petal_length</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="form-control">petal_width</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="form-control">species</p>
+                </div>
+            </div>
+            <div class="row align-items-center" id="display_table">
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div id="Sepal" style="width:100%;max-width:700px"></div>
+            </div>
+            <div class="col-md-6">
+                <div id="Petal" style="width:100%;max-width:700px"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            function updateValue(e) {
+                var id = e.target.id;
+                var value = e.target.value;
+                $("#rangeValue_"+id).text(value);
+            }
+            var range_sepal_length = $("#sepal_length")[0];
+            var range_sepal_width = $("#sepal_width")[0];
+            var range_petal_length = $("#petal_length")[0];
+            var range_petal_width = $("#petal_width")[0];
+
+            range_sepal_length.addEventListener("input", updateValue);
+            range_sepal_width.addEventListener("input", updateValue);
+            range_petal_length.addEventListener("input", updateValue);
+            range_petal_width.addEventListener("input", updateValue);
+
+            $(".display_file").hide();
+            $("#chooseInput").click(function(){
+                $(".display_input").show();
+                $(".display_file").hide();
+            });
+            $("#demoFile").change(function(){
+                if(this.checked){
+                    $("#header").show();
+                    $("#file").hide();
+                    fetch('/static/file/X_test.csv')
+                    .then(response => response.text())
+                    .then(data => {
+                        table_intext = "";
+                        // console.log(data);
+                        let rows = data.split('\n'); // Tách dữ liệu thành các dòng
+                        let tableData = [];
+                        rows.forEach(row => {
+                            let rowData = row.split(','); // Tách dữ liệu thành các cột
+                            tableData.push(rowData);
+                        });
+                        tableData.forEach(
+                            row =>{
+                                $.ajax({
+                                    url: "/predict/",
+                                    type: "POST",
+                                    data: {
+                                        "sepal_length": row[0],
+                                        "sepal_width": row[1],
+                                        "petal_length": row[2],
+                                        "petal_width": row[3],
+                                        'csrfmiddlewaretoken': '{{csrf_token}}'
+                                    },
+                                    success: function(response){
+                                        path_image="/static/images/"+response.path_image;
+                                        name_image= response.name_image;
+                                        table_intext = `
+                                            <div class="col-md-2">
+                                                <input type="text" class="form-control" value=${row[0]} readonly>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="text" class="form-control" value=${row[1]} readonly>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="text" class="form-control" value=${row[2]} readonly>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="text" class="form-control" value=${row[3]} readonly>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <img id="show_img" alt="" src=${path_image} class="img-thumbnail" style="max-width: 50%;">
+                                                <p id="show_name">${name_image}</p>
+                                            </div>
+                                        `;
+                                        $("#display_table").append(table_intext);
+                                    },
+                                    error: function(){
+                                        // alert("predict error");
+                                    }
+                                });
+                            }
+                        )
+                    });
+                }
+                else{
+                    $("#display_table").empty();
+                    $("#header").hide();
+                    $("#file").show();
+                }
+            });
+            $("#chooseFile").click(function(){
+                $(".display_input").hide();
+                $("#header").hide();
+                $(".display_file").show();
+            });
+
+            // $("#upload").click(function(){
+                
+            // })
+
+            $("#file").change(function() {
+                $("#header").show();
+                var file = this.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    table_intext = "";
+                    // console.log(e.target.result);
+                    let rows = e.target.result.split('\n'); // Tách dữ liệu thành các dòng
+                    let tableData = [];
+                    rows.forEach(row => {
+                        let rowData = row.split(','); // Tách dữ liệu thành các cột
+                        tableData.push(rowData);
+                    });
+                    tableData.forEach(
+                        row =>{
+                            $.ajax({
+                                url: "/predict/",
+                                type: "POST",
+                                data: {
+                                    "sepal_length": row[0],
+                                    "sepal_width": row[1],
+                                    "petal_length": row[2],
+                                    "petal_width": row[3],
+                                    'csrfmiddlewaretoken': '{{csrf_token}}'
+                                },
+                                success: function(response){
+                                    path_image="/static/images/"+response.path_image;
+                                    name_image= response.name_image;
+                                    table_intext = `
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" value=${row[0]} readonly>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" value=${row[1]} readonly>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" value=${row[2]} readonly>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" value=${row[3]} readonly>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <img id="show_img" alt="" src=${path_image} class="img-thumbnail" style="max-width: 50%;">
+                                            <p id="show_name">${name_image}</p>
+                                        </div>
+                                    `;
+                                    $("#display_table").append(table_intext);
+                                },
+                                error: function(){
+                                    // alert("predict error");
+                                }
+                            });
+                        }
+                    )
+                }
+                reader.readAsText(file);
+            });
+
+
+            function hasNaN(arr) {
+                return arr.some(function(element) {
+                    return isNaN(element) || element == 0;
+                });
+            }
+            
+            // Lắng nghe sự kiện thay đổi cho các phần tử input
+            $("#sepal_length, #sepal_width, #petal_length, #petal_width").change(handleInputChange);
+                // Xử lý sự kiện thay đổi giá trị đầu vào
+
+            function handleInputChange() {
+                array_feature = [];
+                // Loop qua tất cả các phần tử input
+                $("#sepal_length, #sepal_width, #petal_length, #petal_width").each(function() {
+                    var inputValue = parseFloat($(this).val());
+                    // Lấy tên biến từ ID của phần tử input hiện tại
+                    var variableName = $(this).attr("id");
+
+                    array_feature.push(inputValue);
+                });
+                if (!hasNaN(array_feature)){
+                    // console.log(array_feature);
+                    $.ajax({
+                    url: "/predict/",
+                    type: "POST",
+                    data: {
+                        "sepal_length": array_feature[0],
+                        "sepal_width": array_feature[1],
+                        "petal_length": array_feature[2],
+                        "petal_width": array_feature[3],
+                        'csrfmiddlewaretoken': '{{csrf_token}}'
+                    },
+                    success: function(response){
+                        path_image="/static/images/"+response.path_image;
+                        // console.log( $("#show_img").attr("src"));
+                        $("#show_img").attr("src", path_image);
+                        $("#show_name").text(response.name_image);
+                    },
+                    error: function(){
+                        // alert("predict error");
+                    }
+                    });
+                }
+            }
+
+            fetch('api/get_data/')
+            .then(response => response.json())
+            .then(data => {
+                var draggedValue = null;
+                function updatePoint_sepal(e){
+                    var value_range_sepal_length= $("#sepal_length").val();
+                    var value_range_sepal_width= $("#sepal_width").val();
+                    var Newvalue = parseFloat(event.target.value);
+                    if (draggedValue === null) {
+                        draggedValue = Newvalue;
+                        var newPoint = {
+                            x: [value_range_sepal_length],
+                            y: [value_range_sepal_width],
+                            mode: 'markers',
+                            type: 'scatter',
+                            name: 'Điểm lựa chọn của bạn',
+                            marker: {
+                                color: 'black',
+                                size: 10,
+                            }
+                        };
+                        
+                        data_plot.push(newPoint);
+                        var layout = {
+                            xaxis: {title: 'Sepal length'},
+                            yaxis: {title: 'Sepal width'}
+                        }
+                        Plotly.newPlot('Sepal', data_plot, layout);
+                    }
+                    else if(draggedValue!==Newvalue){
+                        draggedValue = Newvalue;
+                        var newPoint = {
+                            x: [value_range_sepal_length],
+                            y: [value_range_sepal_width],
+                            mode: 'markers',
+                            type: 'scatter',
+                            name: 'Điểm lựa chọn của bạn',
+                            marker: {
+                                color: 'black',
+                                size: 10,
+                            }
+                        };
+                        data_plot[data_plot.length-1] = newPoint;
+                        var layout = {
+                            xaxis: {title: 'Sepal length'},
+                            yaxis: {title: 'Sepal width'}
+                        }
+                        Plotly.newPlot('Sepal', data_plot, layout);
+                    }
+                }
+
+                range_sepal_length.addEventListener("input", updatePoint_sepal);
+                range_sepal_width.addEventListener("input", updatePoint_sepal);
+
+                setosa_sepal_length = data['setosa']['sepal_length'];
+                setosa_sepal_width = data['setosa']['sepal_width'];
+
+                versicolor_sepal_length = data['versicolor']['sepal_length'];
+                versicolor_sepal_width = data['versicolor']['sepal_width'];
+
+                virginica_sepal_length = data['virginica']['sepal_length'];
+                virginica_sepal_width = data['virginica']['sepal_width'];
+                
+
+                var setosa_sepal = {
+                    x: setosa_sepal_length,
+                    y: setosa_sepal_width,
+                    name: 'Iris setosa',
+                    mode: 'markers',
+                    type: 'scatter'
+                };
+                    
+                var versicolor_sepal = {
+                    x: versicolor_sepal_length,
+                    y: versicolor_sepal_width,
+                    name: 'Iris versicolor',
+                    mode: 'markers',
+                    type: 'scatter'
+                };
+                
+                var virginica_sepal = {
+                    x: virginica_sepal_length,
+                    y: virginica_sepal_width,
+                    name: 'Iris virginica',
+                    mode: 'markers',
+                    type: 'scatter'
+                };
+                
+                var data_plot = [setosa_sepal, versicolor_sepal, virginica_sepal];
+                var layout = {
+                    xaxis: {title: 'Sepal length'},
+                    yaxis: {title: 'Sepal width'}
+                }
+                Plotly.newPlot('Sepal', data_plot, layout);
+            })
+
+            fetch('api/get_data/')
+            .then(response => response.json())
+            .then(data => {
+
+                var draggedValue = null;
+
+                function updatePoint_petal(e){
+                    var value_range_petal_length= $("#petal_length").val();
+                    var value_range_petal_width= $("#petal_width").val();
+                    var Newvalue = parseFloat(event.target.value);
+                    if (draggedValue === null) {
+                        draggedValue = Newvalue;
+                        var newPoint = {
+                            x: [value_range_petal_length],
+                            y: [value_range_petal_width],
+                            mode: 'markers',
+                            type: 'scatter',
+                            name: 'Điểm lựa chọn của bạn',
+                            marker: {
+                                color: 'black',
+                                size: 10,
+                            }
+                        };
+                        
+                        data_plot.push(newPoint);
+                        var layout = {
+                            xaxis: {title: 'Petal length'},
+                            yaxis: {title: 'Petal width'}
+                        }
+                        Plotly.newPlot('Petal', data_plot, layout);
+                    }
+                    else if(draggedValue!==Newvalue){
+                        draggedValue = Newvalue;
+                        var newPoint = {
+                            x: [value_range_petal_length],
+                            y: [value_range_petal_width],
+                            mode: 'markers',
+                            type: 'scatter',
+                            name: 'Điểm lựa chọn của bạn',
+                            marker: {
+                                color: 'black',
+                                size: 10,
+                            }
+                        };
+                        data_plot[data_plot.length-1] = newPoint;
+                        var layout = {
+                            xaxis: {title: 'Petal length'},
+                            yaxis: {title: 'Petal width'}
+                        }
+                        Plotly.newPlot('Petal', data_plot, layout);
+                    }
+                }
+
+                range_petal_length.addEventListener("input", updatePoint_petal);
+                range_petal_width.addEventListener("input", updatePoint_petal);
+
+                setosa_petal_length = data['setosa']['petal_length'];
+                setosa_petal_width = data['setosa']['petal_width'];
+
+                versicolor_petal_length = data['versicolor']['petal_length'];
+                versicolor_petal_width = data['versicolor']['petal_width'];
+
+                virginica_petal_length = data['virginica']['petal_length'];
+                virginica_petal_width = data['virginica']['petal_width'];
+                
+                var setosa_petal = {
+                    x: setosa_petal_length,
+                    y: setosa_petal_width,
+                    name: 'Iris setosa',
+                    mode: 'markers',
+                    type: 'scatter'
+                };
+
+                var versicolor_petal = {
+                    x: versicolor_petal_length,
+                    y: versicolor_petal_width,
+                    name: 'Iris versicolor',
+                    mode: 'markers',
+                    type: 'scatter'
+                };
+
+                var virginica_petal = {
+                    x: virginica_petal_length,
+                    y: virginica_petal_width,
+                    name: 'Iris virginica',
+                    mode: 'markers',
+                    type: 'scatter'
+                };
+
+                var data_plot = [setosa_petal, versicolor_petal, virginica_petal];
+                var layout = {
+                    xaxis: {title: 'Petal length'},
+                    yaxis: {title: 'Petal width'}
+                }
+                Plotly.newPlot('Petal', data_plot, layout);
+            })
+        });
+    </script>
+</body>
+</html>
